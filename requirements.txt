@@ -1,0 +1,14 @@
+"""
+Enthält eine Liste von Modulen, die das Projekt zum Ausführen
+benötigt (Abhängigkeiten). Zum Beispiel könnte es eine 
+so einfache Textdatei sein wie diese:
+
+Mit dieser Datei kannst du diese Module mit einem einzigen
+Befehl wie pip install -r requirements.txtinstallieren.
+
+"""
+
+sqlalchemy
+requests
+matplotlib
+thefuzz
