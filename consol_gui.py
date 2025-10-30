@@ -486,7 +486,7 @@ def create_website(movies: dict[str, dict[str, None]]):
         template)
 
     name_site = "index.html"
-    path_site = os.path.join(os.getcwd(), f"_static\{name_site}")
+    path_site = os.path.join(os.getcwd(), f"_static/{name_site}")
     file_operations.save_html(template, path_site)
 
     print()
