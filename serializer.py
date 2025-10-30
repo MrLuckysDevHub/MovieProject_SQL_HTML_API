@@ -1,7 +1,7 @@
 
 
-def serialize_template_title(html_template: str):
-    string_output = 'Mister Gluecks Nice Movie App'
+def serialize_template_title(html_template: str, user_name):
+    string_output = f'The films in {user_name}s\' database'
     return html_template.replace("__TEMPLATE_TITLE__", string_output)
 
 def serialize_template_movie_grid(
@@ -30,7 +30,9 @@ def serialize_template_movie_grid(
 
 
 def serialized_movies_to_html_template(
-    movies: dict[str, any], html_template: str
+    user_name,
+    movies: dict[str, any], 
+    html_template: str
 ) -> str:
     """Generates an HTML string from the given template and movie data"""
     if movies is None:
@@ -38,6 +40,6 @@ def serialized_movies_to_html_template(
         return html_template
 
     '''Creates the h1 header in the template'''
-    template = serialize_template_title(html_template)
+    template = serialize_template_title(html_template, user_name)
     template = serialize_template_movie_grid(movies, template)
     return template

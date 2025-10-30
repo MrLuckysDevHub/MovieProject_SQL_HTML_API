@@ -11,6 +11,22 @@ import APIs.infos_from_OmDb as apis
 import file_operations
 import serializer
 
+"""global value for the selected active user"""
+active_user = {}
+
+
+def get_active_user_name():
+    """Get the global user name"""
+    global active_user
+    key = get_active_user_id()
+    return active_user[key]["first_name"]
+
+
+def get_active_user_id():
+    """Get the global database user ID"""
+    global active_user
+    return next(iter(active_user))
+
 
 def clear_the_screen():
     """
@@ -165,11 +181,11 @@ def add_movie(movies: dict[str, dict[str, any]]) -> None:
 
     name = info_fromApi.get("Title")
     poster_url = info_fromApi.get("Poster")
-    try: 
+    try:
         """On some data the year has following format 2013-2018"""
         year = int(info_fromApi.get("Year", datetime.datetime.now().year))
     except ValueError:
-        year = int(info_fromApi.get("Year","")[:4])
+        year = int(info_fromApi.get("Year", "")[:4])
     try:
         rating = float(info_fromApi.get("imdbRating", 0.0))
     except ValueError:
@@ -179,7 +195,13 @@ def add_movie(movies: dict[str, dict[str, any]]) -> None:
     # year = input_year('Enter movie release year')
     # rating = input_rating('Enter movie rating')
 
-    data_storage.add_movie(name, year, rating, poster_url)
+    data_storage.add_movie(
+        get_active_user_id(),
+        name, 
+        year, 
+        rating, 
+        poster_url)
+    
     print(f"Movie {name} successfully added.")
     print_enter_to_continue()
 
@@ -212,7 +234,7 @@ def delete_movie(movies: dict[str, dict[str, any]]) -> None:
 
     title = input_movie_name("Enter movie name to delete: ")
     if movies.get(title) != None:
-        data_storage.delete_movie(title)
+        data_storage.delete_movie(get_active_user_id(), title)
         print(f"Movie {title} successfully deleted.")
     else:
         print_movie_not_exist(title)
@@ -456,7 +478,10 @@ def create_website(movies: dict[str, dict[str, None]]):
         print_enter_to_continue()
         return
 
-    template = serializer.serialized_movies_to_html_template(movies, template)
+    template = serializer.serialized_movies_to_html_template(
+        get_active_user_name(),
+        movies, 
+        template)
 
     name_site = "index.html"
     path_site = os.path.join(os.getcwd(), f"_static\{name_site}")
@@ -512,9 +537,11 @@ def display_main_menu(mainMenu_dict: list[tuple[str, types.FunctionType]]) -> No
 
     """
     print()
-    print("******** My Movies Database ****************")
+    print(
+        f"******** My Movies Database active user {get_active_user_name()} *************"
+    )
     print("" * 2)
-    print("Menu:")
+    print(f"Menu for {get_active_user_name()}:")
     for i, menu_entry in enumerate(mainMenu_dict):
         print(f"{i + 1}. {menu_entry[0]}")
 
@@ -538,3 +565,71 @@ def get_menu_id_user_input(mainMenu_dict: list[tuple[str, types.FunctionType]]) 
     if menu_id_str.isdigit():
         return int(menu_id_str) - 1
     return None
+
+
+def create_new_user() -> dict[int:str]:
+    print()
+    while True:
+        user_input = input("Please input an user name: ")
+        if user_input:
+            db_user = data_storage.get_user(user_input)
+            if not db_user:
+                break
+            else:
+                print(
+                    f"User {db_user['first_name']} exits, please try another user name: "
+                )
+
+    data_storage.add_user(user_input)
+    return data_storage.get_user(user_input)
+
+
+def display_user_menu() -> dict[int:str]:
+    """
+    Prints the user menu of the program
+
+    Parameters: None
+    ----------
+
+    Return : None
+    -------
+
+    """
+    print()
+    print("******** My Movies Database ****************")
+    print("" * 2)
+    print("Select a user:")
+
+    users = data_storage.get_users()
+    menu_user = {}
+    global active_user
+    nr = 1
+    for id, value in users.items():
+        user_name = value["first_name"]
+        print(f"{nr}. {user_name}")
+        menu_user[nr] = {id: value}
+        nr += 1
+
+    print(f"{nr}. Create new user")
+    print(f"x. Exit program")
+
+    print()
+    while True:
+        menu_id_str = input(f"Enter choice (1-{len(users)+1}):")
+        if "x" in menu_id_str.lower():
+            exit_program(None)
+        try:
+            choice_id = int(menu_id_str)
+            if choice_id <= len(users) + 1:
+                break
+            else:
+                print(f"{choice_id} is a wrong menu ID, try again...")
+        except ValueError:
+            print(f"{menu_id_str} is a wrong choice, try again...")
+
+    if choice_id > len(users):
+        active_user = create_new_user()
+    else:
+        active_user = menu_user[choice_id]
+
+    return active_user

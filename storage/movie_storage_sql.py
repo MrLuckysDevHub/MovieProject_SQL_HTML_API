@@ -12,25 +12,45 @@ with engine.connect() as connection:
     connection.execute(
         text(
             """
-        CREATE TABLE IF NOT EXISTS movies (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT UNIQUE NOT NULL,
-            year INTEGER NOT NULL,
-            rating REAL NOT NULL,
-            poster_url TEXT 
-        )
+            CREATE TABLE IF NOT EXISTS movies (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                title TEXT UNIQUE NOT NULL,
+                year INTEGER NOT NULL,
+                rating REAL NOT NULL,
+                poster_url TEXT 
+            )
         ;
         """
-        )
-    )
+        ))
+        
+    connection.execute(
+        text(
+            """
+            CREATE TABLE IF NOT EXISTS users (
+                id	INTEGER PRIMARY KEY AUTOINCREMENT,
+                first_name	TEXT NOT NULL
+            )
+        ;
+        """
+        ))
     # connection.commit()
 
 
-def get_movies() -> dict[str, dict[str, any]]:
+def get_movies(user_id) -> dict[str, dict[str, any]]:
     """Retrieve all movies from the database."""
     with engine.connect() as connection:
         result = connection.execute(
-            text("SELECT title, year, rating, poster_url FROM movies;"))
+            text(
+                """
+                SELECT title, year, rating, poster_url 
+                FROM movies
+                WHERE user_id= :user_id
+                ;
+                """),
+            (
+                {"user_id": user_id}
+            ))
         movies = result.fetchall()
     return {row[0]: 
         {
@@ -41,19 +61,20 @@ def get_movies() -> dict[str, dict[str, any]]:
         } for row in movies}
 
 
-def add_movie(title: str, year: int, rating: float, url_poster: str) -> None:
+def add_movie(user_id: int, title: str, year: int, rating: float, url_poster: str) -> None:
     """Add a new movie to the database."""
     with engine.connect() as connection:
         try:
             connection.execute(
                 text(
                     """
-                    INSERT INTO movies (title, year, rating, poster_url) 
-                    VALUES (:title, :year, :rating, :url_poster)
+                    INSERT INTO movies (user_id, title, year, rating, poster_url) 
+                    VALUES (:user_id, :title, :year, :rating, :url_poster)
                     ;
                     """
                 ),
-                {"title": title, 
+                {"user_id" : user_id,
+                 "title": title, 
                  "year": year, 
                  "rating": rating, 
                  'url_poster': url_poster},
@@ -64,7 +85,7 @@ def add_movie(title: str, year: int, rating: float, url_poster: str) -> None:
             print(f"Error: {e}")
 
 
-def delete_movie(title):
+def delete_movie(user_id, title):
     """Delete a movie from the database."""
     with engine.connect() as connection:
         try:
@@ -73,11 +94,11 @@ def delete_movie(title):
                     """
                     DELETE FROM 
                         movies 
-                    WHERE title = :title
+                    WHERE user_id = :user_id AND title = :title
                     ;
                     """
                 ),
-                {"title": title},
+                {"user_id": user_id, "title": title},
             )
             connection.commit()
             print(f"Movie '{title}' removed successfully.")
@@ -85,7 +106,7 @@ def delete_movie(title):
             print(f"Error: {e}")
 
 
-def update_movie(title, rating):
+def update_movie(user_id, title, rating):
     """Update a movie's rating in the database."""
     with engine.connect() as connection:
         try:
@@ -95,13 +116,65 @@ def update_movie(title, rating):
                     UPDATE 
                         movies 
                     SET rating = :rating 
-                    WHERE title = :title
+                    WHERE user_id = :user_id AND title = :title
                     ;
                     """
                 ),
-                {"title": title, "rating": rating},
+                {"user_id":user_id, "title": title, "rating": rating},
             )
             connection.commit()
             print(f"Movie '{title}' updated successfully.")
         except Exception as e:
             print(f"Error: {e}")
+            
+            
+def get_users() -> dict[str, dict[str, any]]:
+    """Retrieve all users from the database."""
+    with engine.connect() as connection:
+        result = connection.execute(
+            text("SELECT id, first_name FROM users;"))
+        users = result.fetchall()
+    return {row[0]: 
+        {
+            "first_name": row[1], 
+            
+        } for row in users}
+
+def get_user(user_name) -> dict[str, dict[str, any]]:
+    """Retrieve all users from the database."""
+    with engine.connect() as connection:
+        result = connection.execute(
+            text(
+                """
+                SELECT id, first_name FROM users
+                WHERE first_name = :first_name
+                ;
+                """),
+                {"first_name": user_name},
+            )
+        users = result.fetchall()
+    return {row[0]: 
+        {
+            "first_name": row[1], 
+            
+        } for row in users}
+    
+def add_user(user_name: str) -> None:
+    """Add a new user to the database."""
+    with engine.connect() as connection:
+        try:
+            connection.execute(
+                text(
+                    """
+                    INSERT INTO users (first_name) 
+                    VALUES (:first_name)
+                    ;
+                    """
+                ),
+                {"first_name": user_name},
+            )
+            connection.commit()
+            print(f"User '{user_name}' added successfully.")
+        except Exception as e:
+            print(f"Error: {e}")
+
