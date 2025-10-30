@@ -15,7 +15,7 @@ with engine.connect() as connection:
             CREATE TABLE IF NOT EXISTS movies (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER NOT NULL,
-                title TEXT UNIQUE NOT NULL,
+                title TEXT NOT NULL,
                 year INTEGER NOT NULL,
                 rating REAL NOT NULL,
                 poster_url TEXT,

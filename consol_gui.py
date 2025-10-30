@@ -472,7 +472,7 @@ def filtered_by_minimum_rating(movies: dict[str, dict[str, None]]):
 
 def create_website(movies: dict[str, dict[str, None]]):
     name_temp_site = "index_template.html"
-    path_site = os.path.join(os.getcwd(), f"_static\{name_temp_site}")
+    path_site = os.path.join(os.getcwd(), f"_static/{name_temp_site}")
     template = file_operations.load_template_html(path_site)
     if template == "":
         print()
