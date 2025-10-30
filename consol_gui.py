@@ -181,6 +181,7 @@ def add_movie(movies: dict[str, dict[str, any]]) -> None:
 
     name = info_fromApi.get("Title")
     poster_url = info_fromApi.get("Poster")
+    imdb_id = info_fromApi.get("imdbID")
     try:
         """On some data the year has following format 2013-2018"""
         year = int(info_fromApi.get("Year", datetime.datetime.now().year))
@@ -200,7 +201,8 @@ def add_movie(movies: dict[str, dict[str, any]]) -> None:
         name, 
         year, 
         rating, 
-        poster_url)
+        poster_url,
+        imdb_id)
     
     print(f"Movie {name} successfully added.")
     print_enter_to_continue()

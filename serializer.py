@@ -13,8 +13,14 @@ def serialize_template_movie_grid(
         string_output+='<li>\n'
         string_output+='  <div class="movie">\n'
         
+        imdb_link = f'https://www.imdb.com/de/title/{values['imdb_id']}/'
+        
         if values['poster_url'] is not None:
-            string_output+=f'   <img class="movie-poster" src="{values['poster_url']}" alt="{movie_title}: Can\'t  load movie poster!">\n'
+            string_output+=f'''   
+                <a href ={imdb_link}>\n
+                    <img class="movie-poster" src="{values['poster_url']}" alt="{movie_title}: Can\'t  load movie poster!">\n
+                </a>
+            '''
         else:
             string_output+=f'   <p>For the movie {movie_title} poster not found!</p>\n'
 

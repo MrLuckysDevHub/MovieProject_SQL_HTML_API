@@ -18,7 +18,8 @@ with engine.connect() as connection:
                 title TEXT UNIQUE NOT NULL,
                 year INTEGER NOT NULL,
                 rating REAL NOT NULL,
-                poster_url TEXT 
+                poster_url TEXT,
+                imdb_id TEXT 
             )
         ;
         """
@@ -43,7 +44,7 @@ def get_movies(user_id) -> dict[str, dict[str, any]]:
         result = connection.execute(
             text(
                 """
-                SELECT title, year, rating, poster_url 
+                SELECT title, year, rating, poster_url, imdb_id
                 FROM movies
                 WHERE user_id= :user_id
                 ;
@@ -56,20 +57,27 @@ def get_movies(user_id) -> dict[str, dict[str, any]]:
         {
             "year": row[1], 
             "rating": row[2], 
-            "poster_url":row[3]
+            "poster_url":row[3],
+            "imdb_id" : row[4]
             
         } for row in movies}
 
 
-def add_movie(user_id: int, title: str, year: int, rating: float, url_poster: str) -> None:
+def add_movie(
+    user_id: int, 
+    title: str, 
+    year: int, 
+    rating: float, 
+    url_poster: str,
+    imdb_id: str) -> None:
     """Add a new movie to the database."""
     with engine.connect() as connection:
         try:
             connection.execute(
                 text(
                     """
-                    INSERT INTO movies (user_id, title, year, rating, poster_url) 
-                    VALUES (:user_id, :title, :year, :rating, :url_poster)
+                    INSERT INTO movies (user_id, title, year, rating, poster_url, imdb_id) 
+                    VALUES (:user_id, :title, :year, :rating, :url_poster, :imdb_id)
                     ;
                     """
                 ),
@@ -77,7 +85,8 @@ def add_movie(user_id: int, title: str, year: int, rating: float, url_poster: st
                  "title": title, 
                  "year": year, 
                  "rating": rating, 
-                 'url_poster': url_poster},
+                 'url_poster': url_poster,
+                 'imdb_id': imdb_id}
             )
             connection.commit()
             print(f"Movie '{title}' added successfully.")
