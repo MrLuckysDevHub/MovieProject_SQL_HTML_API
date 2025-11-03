@@ -471,6 +471,10 @@ def filtered_by_minimum_rating(movies: dict[str, dict[str, None]]):
 
 
 def create_website(movies: dict[str, dict[str, None]]):
+    """
+    Creates the website for the movies
+    """
+    
     name_temp_site = "index_template.html"
     path_site = os.path.join(os.getcwd(), f"_static/{name_temp_site}")
     template = file_operations.load_template_html(path_site)
@@ -570,6 +574,12 @@ def get_menu_id_user_input(mainMenu_dict: list[tuple[str, types.FunctionType]]) 
 
 
 def create_new_user() -> dict[int:str]:
+    """
+    Creates an new user from an user input in the database
+
+    Returns:
+        dict[int:str]:{id:'first_name'}
+    """
     print()
     while True:
         user_input = input("Please input an user name: ")
@@ -605,14 +615,14 @@ def display_user_menu() -> dict[int:str]:
     users = data_storage.get_users()
     menu_user = {}
     global active_user
-    nr = 1
+    user_index = 1
     for id, value in users.items():
         user_name = value["first_name"]
-        print(f"{nr}. {user_name}")
-        menu_user[nr] = {id: value}
-        nr += 1
+        print(f"{user_index}. {user_name}")
+        menu_user[user_index] = {id: value}
+        user_index += 1
 
-    print(f"{nr}. Create new user")
+    print(f"{user_index}. Create new user")
     print(f"x. Exit program")
 
     print()
